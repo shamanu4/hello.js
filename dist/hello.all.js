@@ -1436,6 +1436,12 @@ hello.utils.extend(hello.utils, {
 		return popup;
 	},
 
+	htmlDecode: function(encoded) {
+		var elem = document.createElement('textarea');
+		elem.innerHTML = encoded;
+		return elem.value;
+	},
+
 	// OAuth and API response handler
 	responseHandler: function(window, parent) {
 
@@ -1486,7 +1492,14 @@ hello.utils.extend(hello.utils, {
 					_this.extend(p, b);
 				}
 				catch (e) {
-					console.error('Could not decode state parameter');
+					var htmlDecoded = this.htmlDecode(p.state);
+					try {
+						var b = JSON.parse(htmlDecoded);
+						_this.extend(p, b);
+					}
+					catch (e) {
+						console.error('Could not decode state parameter');
+					}
 				}
 			}
 
@@ -5490,6 +5503,48 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 })(hello);
 
+(function(hello) {
+
+	hello.init({
+
+		twitch: {
+
+			name: 'Twitch',
+
+			oauth: {
+				version: 2,
+				auth: 'https://id.twitch.tv/oauth2/authorize',
+				grant: 'https://id.twitch.tv/oauth2/token'
+			},
+
+			// Authorization scopes
+			scope: {
+				email: 'user_read',
+			},
+
+			scope_delim: ' ',
+
+			login: function(p) {
+
+				if (p.qs.response_type === 'code') {
+					p.qs.access_type = 'offline';
+				}
+
+				if (p.options.force) {
+					p.qs.approval_prompt = 'force';
+				}
+			},
+
+			get: {
+				me: 'user',
+			},
+
+			form: false
+		}
+	});
+
+})(hello);
+
 // Vkontakte (vk.com)
 (function(hello) {
 
@@ -5846,7 +5901,6 @@ hello.init({
 			// Yahoo does dynamically change it on the fly for the signin screen (only, what if your already signed in)
 			p.options.window_width = 560;
 
-
 			// Yahoo throws an parameter error if for whatever reason the state.scope contains a comma, so lets remove scope
 			try{delete p.qs.scope;delete p.qs.state.scope;}catch(e){}
 		},
@@ -5869,11 +5923,14 @@ hello.init({
 
 		base	: "https://social.yahooapis.com/v1/",
 
+		// This will not work!, don't even try.
+		// All I have implemented in Yahoo provider is obtaining access token.
 		get : {
-			"me"		: "user/abcdef123/profile?format=json",
+			"me"		: "user",
 			"me/friends"	: yql('select * from social.contacts(0) where guid=me'),
 			"me/following"	: yql('select * from social.contacts(0) where guid=me')
 		},
+
 		wrap : {
 			me : function(o){
 				formatError(o);

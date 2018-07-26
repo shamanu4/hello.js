@@ -53,6 +53,7 @@ module.exports = function(grunt) {
 					'src/modules/soundcloud.js',
 					'src/modules/spotify.js',
 					'src/modules/twitter.js',
+					'src/modules/twitch.js',
 					'src/modules/vk.js',
 					'src/modules/windows.js',
 					'src/modules/yahoo.js',
