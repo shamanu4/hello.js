@@ -1283,6 +1283,12 @@ hello.utils.extend(hello.utils, {
 		return popup;
 	},
 
+	htmlDecode: function(encoded) {
+		var elem = document.createElement('textarea');
+		elem.innerHTML = encoded;
+		return elem.value;
+	},
+
 	// OAuth and API response handler
 	responseHandler: function(window, parent) {
 
@@ -1333,7 +1339,14 @@ hello.utils.extend(hello.utils, {
 					_this.extend(p, b);
 				}
 				catch (e) {
-					console.error('Could not decode state parameter');
+					var htmlDecoded = this.htmlDecode(p.state);
+					try {
+						var b = JSON.parse(htmlDecoded);
+						_this.extend(p, b);
+					}
+					catch (e) {
+						console.error('Could not decode state parameter');
+					}
 				}
 			}
 
