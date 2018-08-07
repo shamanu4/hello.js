@@ -98,7 +98,10 @@ hello.utils.extend(hello, {
 		// When 'display=page' this property defines where the users page should end up after redirect_uri
 		// Ths could be problematic if the redirect_uri is indeed the final place,
 		// Typically this circumvents the problem of the redirect_url being a dumb relay page.
-		page_uri: window.location.href
+		page_uri: window.location.href,
+
+		// By default reuse access token from local storage and try to log-in
+		autoemit: true
 	},
 
 	// Service configuration objects
@@ -1590,7 +1593,7 @@ hello.utils.Event.call(hello);
 			}
 
 			// Access_token has been created
-			else if (session.access_token && !oldSess.access_token) {
+			else if (hello.settings.autoemit && session.access_token && !oldSess.access_token) {
 				emit('login');
 			}
 
